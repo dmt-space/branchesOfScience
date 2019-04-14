@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+    ::-webkit-input-placeholder {
+        /* Chrome */
+
+        font-family: 'Open Sans Condensed';
+        color: #2cc0ec;
+    }
+
+    :-ms-input-placeholder {
+        /* IE 10+ */
+
+        font-family: 'Open Sans Condensed';
+        color: #2cc0ec;
+    }
+
+    ::-moz-placeholder {
+        /* Firefox 19+ */
+
+        font-family: 'Open Sans Condensed';
+        color: #2cc0ec;
+        opacity: 1;
+    }
+
+    :-moz-placeholder {
+        /* Firefox 4 - 18 */
+
+        font-family: 'Open Sans Condensed';
+        color: #2cc0ec;
+        opacity: 1;
+    }
+
+    .titleTT {
+
+        font-family: 'Open Sans Condensed';
+        font-weight: 100;
+    }
+
+    .contentTT {
+        font-family: 'Open Sans Condensed';
+        font-size: 14px;
+        font-weight: 100;
+    }
+
+    .d3-tip {
+        max-width: 60%;
+        line-height: 1;
+        font-weight: bold;
+        padding: 12px;
+        background: #0f2d38;
+        color: #fff;
+        border-radius: 2px;
+    }
+
+    /* Creates a small triangle extender for the tooltip */
+    .d3-tip:after {
+        box-sizing: border-box;
+        display: inline;
+        font-size: 10px;
+        width: 100%;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.8);
+        content: "\25BC";
+        position: absolute;
+        text-align: center;
+    }
+
+    /* Style northward tooltips differently */
+    .d3-tip.n:after {
+        margin: -1px 0 0 0;
+        top: 100%;
+        left: 0;
+    }
+
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        stroke-opacity: .6;
+    }
+
+    .node:hover {
+        stroke: black;
+        stroke-opacity: .6;
+        stroke-width: 3px;
+        cursor: help;
+    }
+
+    .link {
+        stroke: #0f4c6b;
+        stroke-opacity: .6;
+    }
+
+    .inputElements {
+
+        font-family: 'Open Sans Condensed';
+        background-color: #112836;
+        color: #2cc0ec;
+        text-decoration-color: #2cc0ec;
+        padding: 10px;
+        border: 1px solid #0b9bd0;
+        width: 20%;
+        position: absolute;
+    }
+
+    #redditURLinput, #redditFrontPage {
+
+        width: 18%;
+        position: absolute;
+
+    }
+
+    #redditFrontPage {
+        color: #E13CFF;
+        left: 20%;
+        height: 40px;
+    }
+
+    #linkReddit {
+
+        display: none;
+        opacity: 0.8;
+
+        font-family: 'Open Sans Condensed';
+        color: #2cc0ec;
+        text-decoration-color: #2cc0ec;
+        padding: 10px;
+        position: absolute;
+
+        color: #E13CFF;
+        left: 40%;
+        height: 40px;
+    }
+
+    #linkReddit:hover {
+        opacity: 1;
+    }
+
+    body {
+        background-color: #121b22;
+        font-family: 'Open Sans Condensed';
+        overflow: hidden;
+    }
+
+</style>
+<link rel="stylesheet" type="text/css" href="fontCondensed.css"/>
+
+<body>
+<input style="display: none" id="redditURLinput" class="inputElements" placeholder=" paste any reddit comment URL here"
+       title="e.g.: https://www.reddit.com/r/gifs/comments/4jgnjw/police_officer_saves_a_dog_from_drowning/">
+
+<select style="display: none" id="redditFrontPage" class="inputElements">
+    <option value="" style="color: #2cc0ec">Select from current frontpage</option>
+</select>
+<a id="linkReddit" href="" target="_blank">LINK</a>
+<script src="jquery.min.js"></script>
+<script src="d3.v3.min.js"></script>
+<script src="d3.tip.v0.6.3.js"></script>
+<script>
+    var root, data, force, svg, width, height, link, node, tip, graph;
+
+    function flatten(root) {
+        var nodes = [], i = 0;
+
+        function recurse(node) {
+            if (node.children) node.children.forEach(recurse);
+            if (!node.id) node.id = ++i;
+            nodes.push(node);
+        }
+
+        recurse(root);
+        return nodes;
+    }
+    function update(init = false) {
+    // .nodes(graph.nodes)
+    //         .links(graph.links)
+        var nodes = flatten(root), // graph.nodes //flatten(root),
+            links = d3.layout.tree().links(nodes) // graph.links
+
+        // Restart the force layout.
+        force
+            .nodes(nodes)
+            .links(links)
+            .start();
+
+        // Update the links…
+        link = link.data(links, function(d) {
+            d.value = d.target.rating
+            return d.target.id;
+        });
+
+        // Exit any old links.
+        link.exit().remove();
+
+        // Enter any new links.
+        link.enter()
+            .append("line")
+            .attr("class", "link")
+            .style("stroke-width", function (d) {
+                return Math.sqrt(d.value);
+            })
+            .insert("line", ".node")
+            .attr("class", "link")
+            .attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
+
+        // Update the nodes…
+        node = node.data(nodes, function(d) {
+            if (init) {
+                if (d.children) {
+                    d._children = d.children;
+                    d.children = null;
+                }
+            }
+            return d.id; })
+            // .style("fill", color);
+        // if (init) update()
+        // Exit any old nodes.
+        node.exit().remove();
+
+        // Enter any new nodes.
+        //
+        // node.enter()
+        //     .append("text")
+        //     .attr("class", "node")
+        //     .attr("x", function(d) { return d.x; })
+        //     .attr("y", function(d) { return d.y; })
+        //     .attr("dy", "0.31em")
+        //     .attr("text-anchor", function(d) { return d._children ? "end" : "start" })
+        //     .text(function(d) { return d.name });
+
+        node.enter()
+            .append("circle")
+            .attr("class", "node")
+            .attr("cx", function(d) { return d.x; })
+            .attr("cy", function(d) { return d.y; })
+            .attr("r", function(d) {
+                return 3+1.8*d.rating || 5
+                // return 10// Math.sqrt(d.weight) / 10 || 4.5;
+            })
+            .style("fill", function (d) {
+                return color(d.branch);
+            })
+            .on('mouseover', tip.show)
+            .on('mouseout', tip.hide)
+            .on("click", click)
+            .call(force.drag)
+
+            // .append("circle")
+            // .attr("class", "node")
+            // .attr("cx", function(d) { return d.x; })
+            // .attr("cy", function(d) { return d.y; })
+            // .attr("r", function(d) { return Math.sqrt(d.size) / 10 || 4.5; })
+            // .style("fill", color)
+            // .on("click", click)
+            // .call(force.drag);
+
+
+
+        force
+            .nodes(nodes)
+            .links(links)
+            .start();
+
+        force.on("tick", function () {
+            var q = d3.geom.quadtree(nodes),
+                i = 0,
+                n = nodes.length;
+            while (++i < n) {
+                q.visit(collide(nodes[i]));
+            }
+
+            link.attr("x1", function (d) {
+                return d.source.x;
+            })
+                .attr("y1", function (d) {
+                    return d.source.y;
+                })
+                .attr("x2", function (d) {
+                    return d.target.x;
+                })
+                .attr("y2", function (d) {
+                    return d.target.y;
+                });
+
+            node.attr("cx", function (d) {
+                return d.x;
+            })
+                .attr("cy", function (d) {
+                    return d.y;
+                });
+        });
+
+
+        function collide(node) {
+            var r = node.value + 16,
+                nx1 = node.x - r,
+                nx2 = node.x + r,
+                ny1 = node.y - r,
+                ny2 = node.y + r;
+            return function (quad, x1, y1, x2, y2) {
+                if (quad.point && (quad.point !== node)) {
+                    var x = node.x - quad.point.x,
+                        y = node.y - quad.point.y,
+                        l = Math.sqrt(x * x + y * y),
+                        r = node.value + quad.point.value;
+                    if (l < r) {
+                        l = (l - r) / l * .5;
+                        node.x -= x *= l;
+                        node.y -= y *= l;
+                        quad.point.x += x;
+                        quad.point.y += y;
+                    }
+                }
+                return x1 > nx2
+                    || x2 < nx1
+                    || y1 > ny2
+                    || y2 < ny1;
+            };
+        }
+
+    }
+
+    function click(d) {
+        console.debug("clicked d",d)
+        if (!d3.event.defaultPrevented) {
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else {
+                d.children = d._children;
+                d._children = null;
+            }
+            update();
+        }
+    }
+
+    function color(d) {
+        return d._children ? "#3182bd" : d.children ? "#c6dbef" : "#fd8d3c";
+    }
+
+    var usedItemLabel = []
+    function getUnique(arr, comp) {
+
+        const unique = arr
+            .map(function(e) { return e[comp]})
+
+        // store the keys of the unique objects
+    .map(function(e, i, final){console.debug(e, (!e || final.indexOf(e) === i) && i);  return (!e || final.indexOf(e) === i) && i})
+
+        // eliminate the dead keys & store unique objects
+    .filter(function(e) { return arr[e] }).map(function(e) { return arr[e]  });
+
+        return unique;
+    }
+
+    function makeTree(csv) {
+        var data = d3.nest()
+            .key(function(d) {return d.instanceLabel; })
+            .key(function(d) {return d.subclassLabel; })
+            .entries(csv);
+
+        return data;
+    }
+
+    d3.csv("data/raw.csv", function(csv) {
+        // var csv = getUnique(csv2,'image')
+    function constructNetwork() {
+        var maxRating = 0;
+
+        var colorId = 0;
+        var currBranch = 0;
+        var nodeIndex = 1;
+        var totalNodes = 0;
+        graph = {
+            "nodes": [
+                {"name": "test", "value": 10, "branch": 0}
+            ],
+            "links": []
+        };
+
+
+        function findMax(data) {
+            $.each(data, function (i, item) {
+                var rating = (item.values || [1]).length;
+                if (rating > maxRating) {
+                    maxRating = rating;
+                }
+
+                if (item.values !== undefined) {
+                    findMax(nodeIndex - 1, item.values);
+                }
+            });
+        }
+
+        var linearScale;
+        var chargeScale;
+
+        function addChildren(currParent, data, csv) {
+            // children [], body '', author '', score 1, replies {}
+            $.each(data, function (i, item) {
+                totalNodes++;
+
+
+                var postItem = Object.assign({}, item)
+                if (!item.itemLabel) {
+                    postItem = Object.assign({}, csv.find(function (el){ return el.instanceLabel === item.key }) || item)
+                }
+                var comment = item.itemDescription || item.key;
+                var author = postItem.itemLabel || item.key || '';
+                var img = postItem.image
+                var rating = (item.values || [1]).length;
+
+                if (comment) {
+                    item.name= '[' + rating + '] ' + author + ': "' + comment + '"'
+                    item.rating = rating
+                    item.item = author
+                    item.author = author
+                    item.img = img
+                    item.comment = comment
+                    item.value = (postItem.itemLabel) ? (5+(2*rating)) : 0,
+                    item.branch = currBranch
+
+
+                    graph.nodes.push({
+                        "name": '[' + rating + '] ' + author + ': "' + comment + '"',
+                        "item": author,
+                        "img": img,
+                        "author": author,
+                        "rating": rating,
+                        "comment": comment,
+                        "value": (postItem.itemLabel) ? (5+(2*rating)) : 0,
+                        "branch": currBranch
+                    });
+                    // usedItemLabel.push(postItem.item)
+                    graph.links.push({"source": nodeIndex, "target": currParent, "value": (rating)});
+                    nodeIndex++;
+
+                    if (item.values !== undefined) {
+                        addChildren(nodeIndex - 1, item.values, csv);
+                    }
+
+                    if (currParent === 0) {
+                        currBranch++;
+                    }
+                }
+
+
+            });
+
+        }
+
+        // $.getJSON(redditURL + ".json?", function (data) {
+
+            var imgurl = "ttps://lh3.googleusercontent.com/-oFQMUUolRKw/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rdOkNsLdWz-R5D2LLk2z2fHQrryuQ/s32-c-mo/photo.jpg"
+
+            // if (data[0] !== undefined) {
+            //     imgurl = data[0].data.children[0].data.thumbnail;
+            // }
+
+            data = makeTree(csv)
+
+            findMax(data)
+
+            chargeScale = d3.scale.sqrt()
+                .domain([0, 5000])
+                .range([600, 40]);
+
+
+            /** constructing data **/
+            addChildren(0, data, csv);
+
+
+            var chargeIndex = chargeScale(totalNodes);
+
+            console.debug("chargeIndex", chargeIndex, totalNodes);
+            console.debug("data", data)
+
+
+            tip = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function (d) {
+                    return "<div class='titleTT' style='color: " + color(d.branch) + "'>" + (d.img ? "<img style=\"float: right; padding-left: 1em\" src=\"" + d.img + "\" height=\"100\" width=\"100\">" : "") + (d.author || d.item).toLocaleUpperCase() + (d.rating ? (" (" + d.rating + ")") : "") + "</span><br><br><span class='contentTT'>" + d.comment + "</span>";
+                })
+
+            /** build visualization **/
+            width = window.innerWidth - 20;
+            height = window.innerHeight - 20;
+
+            color = d3.scale.category10();
+
+            force = d3.layout.force()
+                .charge(function (d) { console.debug(d); return -(Math.sqrt(1.2*d.rating || 1))*chargeIndex})
+                .linkDistance(1)
+                .size([width, height]);
+
+            svg = d3.select("body")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            var defs = svg.append("defs").attr("id", "imgdefs")
+
+            var catpattern = defs.append("pattern")
+                .attr("id", "catpattern")
+                .attr("height", 50)
+                .attr("width", 50)
+
+            catpattern.append("image")
+                .attr("x", -50)
+                .attr("y", -40)
+                .attr("height", 100)
+                .attr("width", 100)
+                .attr("xlink:href", imgurl)
+
+            svg.call(tip);
+
+            // force
+            //     .nodes(graph.nodes)
+            //     .links(graph.links)
+            //     .start();
+
+            link = svg.selectAll(".link")
+                // .data(graph.links)
+                // .enter()
+                 .append("line")
+                .attr("class", "link")
+                .style("stroke-width", function (d) {
+                    return Math.sqrt(d.value);
+                });
+
+            node = svg.selectAll(".node")
+                // .data(graph.nodes)
+                // .enter().append("circle")
+                // .attr("class", "node")
+                // .attr("r", function (d) {
+                //     return d.value
+                // })
+                // .style("fill", function (d) {
+                //     return color(d.branch);
+                // })
+                // .on('mouseover', tip.show)
+                // .on('mouseout', tip.hide)
+                // .on("click", click)
+                // .call(force.drag);
+
+            d3.select("circle")
+                .append("g")
+                .attr("transform", function(d){return "translate("+d.x+",80)"})
+                .append("text")
+                .attr("dx", function(d){return -20})
+                .text(function(d){return 'Branches of Science'})
+                .style("fill", "url(#catpattern)")
+                .on('mouseover', tip.hide)
+                .style("stroke", "#E13CFF")
+                .style("stroke-width", 2)
+                .style("cursor", "inherit");
+
+
+
+    }
+        constructNetwork();
+        root = {"name":"flare",
+            "comment": "Click to expand",
+            "author": "Branches of Science",
+            "img": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Figure_3._A_matrix_of_established_and_putative_partners_for_POLD1_extracted_from_STRING_.jpg",
+            "children":JSON.parse(JSON.stringify(data), function(k, v) {
+                if (k === "values") {
+                    this.children = v;
+                }
+                else
+                    return v;
+            }).filter(function( obj ) {
+                return obj.key;
+            })
+        };
+        update(true);
+        update();
+        //
+        // root = {"name":"flare","children":JSON.parse(JSON.stringify(data), function(k, v) {
+        //         if (k === "values") {
+        //             this.children = null;
+        //             this._children = v;
+        //         }
+        //         else
+        //             return v;
+        //     })};
+        //
+        // update();
+    })
+
+</script>
