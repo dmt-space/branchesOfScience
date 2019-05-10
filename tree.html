@@ -15,7 +15,7 @@
     }
 
     .node text {
-        font: 10px sans-serif;
+        font: 14px sans-serif;
         fill: white;
     }
 
@@ -34,7 +34,7 @@
         width: 208px;
         opacity: 0;
         transition: 1s opacity;
-        font-size: 8px;
+        font-size: 12px;
         padding: 0px;
         pointer-events: none;
     }
@@ -143,7 +143,7 @@
                 links = treeData.descendants().slice(1);
 
             // Normalize for fixed-depth.
-            nodes.forEach(function(d){ d.y = d.depth * 120});
+            nodes.forEach(function(d){ d.y = d.depth * 200});
 
             // ****************** Nodes section ***************************
 
@@ -178,7 +178,7 @@
                 .attr("text-anchor", function(d) {
                     return d.children || d._children ? "end" : "start";
                 })
-                .text(function(d) { return d.data.id; });
+                .text(function(d) { return d.data.id + (d._children ? (' (' + d._children.length+ ')') : ''); });
 
             // UPDATE
             var nodeUpdate = nodeEnter.merge(node);
@@ -192,7 +192,7 @@
 
             // Update the node attributes and style
             nodeUpdate.select('circle.node')
-                .attr('r', 6)
+                .attr('r', 10)
                 .attr('id', function(d) { return "myId"+d.id })
                 .style("fill", function(d) {
                     return d._children ? "rgba(155,0,255,0.4)" : "#fff";
