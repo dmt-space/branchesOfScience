@@ -173,6 +173,8 @@
                 .style("fill", function(d) {
                     return d._children ? "lightsteelblue" : "#9b00ff";
                 })  // Get attributes from circleAttrs var
+                .on("mouseenter", handleMouseOverNode)
+                .on("mouseout", handleMouseOutNode);
 
             // Add labels for the nodes
             nodeEnter.append('text')
@@ -293,8 +295,6 @@
             function handleMouseOver(d, i, e, event) {
                 // console.debug(d,i)
                 currentlySelected = d.id
-                d3.select('#myId' + d.id)
-                    .style('fill-opacity', 0.2)
 
                 d3.select('#myText' + d.id)
                     .style('fill-opacity', 0.6)
@@ -318,15 +318,30 @@
                 oReq.send(null)
             }
 
+            function handleMouseOverNode(d, i, e, event) {
+                // console.debug(d,i)
+                d3.select('#myId' + d.id)
+                    .style('fill-opacity', 0.2)
+            }
+
             function handleMouseOut(d, i, e, event) {
                 currentlySelected = false
                 tooltipSpan.style.opacity = 0
-                d3.select('#myId' + d.id)
-                    .style('fill-opacity', 1)
                 d3.select('#myText' + d.id)
                     .style('fill-opacity', 1)
                 setTimeout(function () {
 console.debug('end!' +  d.id)
+                    d3.select('#myId' + d.id)
+                        .style('fill-opacity', 1)
+                }, 200)
+            }
+
+            function handleMouseOutNode(d, i, e, event) {
+                tooltipSpan.style.opacity = 0
+                d3.select('#myId' + d.id)
+                    .style('fill-opacity', 1)
+                setTimeout(function () {
+                    console.debug('end!' +  d.id)
                     d3.select('#myId' + d.id)
                         .style('fill-opacity', 1)
                 }, 200)
