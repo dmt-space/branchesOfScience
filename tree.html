@@ -14,6 +14,12 @@
         stroke-width: 2px;
     }
 
+    .textLabel {
+        cursor: help;
+        opacity: 1;
+        transition: all .2s;
+    }
+
     .node text {
         font: 14px sans-serif;
         fill: white;
@@ -70,6 +76,7 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script>
     var tooltipSpan = document.getElementById('tooltip-span');
+    var currentlySelected = false
 
     window.addEventListener('resize', () => location.href=location.href, {passive: true})
     function makeTree(csv) {
@@ -166,8 +173,6 @@
                 .style("fill", function(d) {
                     return d._children ? "lightsteelblue" : "#9b00ff";
                 })  // Get attributes from circleAttrs var
-                .on("mouseenter", handleMouseOver)
-                .on("mouseout", handleMouseOut);
 
             // Add labels for the nodes
             nodeEnter.append('text')
@@ -178,7 +183,11 @@
                 .attr("text-anchor", function(d) {
                     return d.children || d._children ? "end" : "start";
                 })
-                .text(function(d) { return d.data.id + (d._children ? (' (' + d._children.length+ ')') : ''); });
+                .text(function(d) { return d.data.id + (d._children ? (' (' + d._children.length+ ')') : ''); })
+                .attr('class', 'textLabel')
+                .attr('id', function(d) { return "myText"+d.id })
+                .on("mouseenter", handleMouseOver)
+                .on("mouseout", handleMouseOut);
 
             // UPDATE
             var nodeUpdate = nodeEnter.merge(node);
@@ -283,22 +292,23 @@
 
             function handleMouseOver(d, i, e, event) {
                 // console.debug(d,i)
+                currentlySelected = d.id
                 d3.select('#myId' + d.id)
                     .style('fill-opacity', 0.2)
+
+                d3.select('#myText' + d.id)
+                    .style('fill-opacity', 0.6)
 
 
                 var { x, y } = document.getElementById('myId' + d.id).getBoundingClientRect()
                 tooltipSpan.innerHTML = ''
                 tooltipSpan.style.top = (y + 20) + 'px';
                 tooltipSpan.style.left = (x - 20) + 'px';
-
-
                 var wikiId = d.data.data.itemWiki
-
                 var oReq = new XMLHttpRequest()
                 oReq.open('GET', "https://en.wikipedia.org/api/rest_v1/page/summary/" + wikiId, true)
                 oReq.onreadystatechange = function () {
-                    if (oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
+                    if (currentlySelected === d.id && oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
                         var wikiData = JSON.parse(oReq.response)
                         var imgIbj = wikiData.thumbnail
                         tooltipSpan.innerHTML = (imgIbj ? '<img src="'+ imgIbj.source +'" style="float: right; padding-bottom: 4px; width: 208px;">' : '') + '<div style="width: 200px; padding-left: 4px; padding-right: 4px;">' + wikiData.extract_html + '</div>'
@@ -309,9 +319,17 @@
             }
 
             function handleMouseOut(d, i, e, event) {
+                currentlySelected = false
                 tooltipSpan.style.opacity = 0
                 d3.select('#myId' + d.id)
                     .style('fill-opacity', 1)
+                d3.select('#myText' + d.id)
+                    .style('fill-opacity', 1)
+                setTimeout(function () {
+console.debug('end!' +  d.id)
+                    d3.select('#myId' + d.id)
+                        .style('fill-opacity', 1)
+                }, 200)
             }
         }
     })
