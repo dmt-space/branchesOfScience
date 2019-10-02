@@ -1,433 +1,764 @@
+
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css?family=Armata&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<link href="css/style.css" rel="stylesheet">
+<script src="js/modernizr.custom.js"></script>
+
+
 <style>
-
-    ::-webkit-input-placeholder {
-        /* Chrome */
-
-        font-family: 'Open Sans Condensed';
-        color: #2cc0ec;
-    }
-
-    :-ms-input-placeholder {
-        /* IE 10+ */
-
-        font-family: 'Open Sans Condensed';
-        color: #2cc0ec;
-    }
-
-    ::-moz-placeholder {
-        /* Firefox 19+ */
-
-        font-family: 'Open Sans Condensed';
-        color: #2cc0ec;
-        opacity: 1;
-    }
-
-    :-moz-placeholder {
-        /* Firefox 4 - 18 */
-
-        font-family: 'Open Sans Condensed';
-        color: #2cc0ec;
-        opacity: 1;
-    }
-
-    .titleTT {
-
-        font-family: 'Open Sans Condensed';
-        font-weight: 100;
-    }
-
-    .contentTT {
-        font-family: 'Open Sans Condensed';
-        font-size: 14px;
-        font-weight: 100;
-    }
-
-    .d3-tip {
-        max-width: 60%;
-        line-height: 1;
-        font-weight: bold;
-        padding: 12px;
-        background: #0f2d38;
-        color: #fff;
-        border-radius: 2px;
-    }
-
-    /* Creates a small triangle extender for the tooltip */
-    .d3-tip:after {
-        box-sizing: border-box;
-        display: inline;
-        font-size: 10px;
+    body {
+        height: 100%;
         width: 100%;
-        line-height: 1;
-        color: rgba(0, 0, 0, 0.8);
-        content: "\25BC";
         position: absolute;
-        text-align: center;
+        margin: 0;
+        font-family: 'Armata', sans-serif;
+        overflow: hidden;
+    }
+    .node circle {
+        fill: #fff7f7;
+        stroke: #dadada;
+        stroke-width: 2px;
     }
 
-    /* Style northward tooltips differently */
-    .d3-tip.n:after {
-        margin: -1px 0 0 0;
-        top: 100%;
-        left: 0;
-    }
-
-    .node {
-        stroke: #fff;
-        stroke-width: 1.5px;
-        stroke-opacity: .6;
-    }
-
-    .node:hover {
-        stroke: black;
-        stroke-opacity: .6;
-        stroke-width: 3px;
+    .textLabel {
         cursor: help;
+        opacity: 1;
+        transition: all .2s;
+    }
+
+    .node text {
+        font: 14px sans-serif;
+        font-family: 'Armata', sans-serif;
+        fill: #fff7f7;
+        font-weight: bolder;
+        text-shadow: 2px 2px #4a4a4a;
     }
 
     .link {
-        stroke: #0f4c6b;
-        stroke-opacity: .6;
+        fill: none;
+        stroke: #818181;
+        stroke-width: 2px;
     }
 
-    .inputElements {
+    #tooltip-span {
+        text-decoration:none;
+        position:relative;
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 45px, rgba(0, 0, 0, 0.22) 0px 10px 18px;
+        border-radius: 2px;
+        background: #fff7f7;
+        width: 208px;
+        opacity: 0;
+        transition: 1s opacity;
+        font-size: 14px;
+        padding: 0px;
+        pointer-events: none;
+        z-index: 9999999;
+    }
+    .tooltip span {
+        display:none;
+    }
+    .tooltip:hover span {
+        display:block;
+        position:fixed;
+        overflow:hidden;
+    }
 
-        font-family: 'Open Sans Condensed';
-        background-color: #112836;
-        color: #2cc0ec;
-        text-decoration-color: #2cc0ec;
-        padding: 10px;
-        border: 1px solid #0b9bd0;
-        width: 20%;
+    .container {
+        display: flex;
+        height: 100vh;
+        align-content: stretch;
+        background-image: linear-gradient(57deg, #464646 0%, #4a4a4a 21%, #909090 100%);
+    }
+    .container #map {
+        flex: 0 0 40%;
+        margin: 0 0 0 auto;
+        position: sticky !important;
+        right: 0;
+        -webkit-mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);
+        mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);
+    }
+
+    #list {
+        z-index: 10000000000;
+    }
+
+    #universityCourses {
+        overflow: auto;
+    }
+
+    svg g {
+        pointer-events: all;
+    }
+
+    .leaflet-fa-markers {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: block;
+        text-align: center;
+        margin-left: -7px;
+        margin-top: -25px;
+        width: 15px;
+        height: 25px;
+    }
+
+    .leaflet-fa-markers .marker-icon-svg {
         position: absolute;
     }
 
-    #redditURLinput, #redditFrontPage {
-
-        width: 18%;
+    .leaflet-fa-markers .feature-icon {
         position: absolute;
-
+        font-size: 10px;
+        line-height: 0px;
+        left: 3px;
+        top: 8px;
+        display: inline-block;
     }
 
-    #redditFrontPage {
-        color: #E13CFF;
-        left: 20%;
-        height: 40px;
-    }
 
-    #linkReddit {
-
+    #myDiv {
+        z-index: 9999999999;
+        border: none;
         display: none;
-        opacity: 0.8;
-
-        font-family: 'Open Sans Condensed';
-        color: #2cc0ec;
-        text-decoration-color: #2cc0ec;
-        padding: 10px;
+        background: white;
+        text-align:justify;
         position: absolute;
-
-        color: #E13CFF;
-        left: 40%;
-        height: 40px;
+        margin: 1em;
+        margin-left: 25%;
+        padding: 1em;
+        width: 50%;
+    }
+    #myDiv p {
+        margin: 15px;
+        font-size: 0.917em;
     }
 
-    #linkReddit:hover {
+    .closeIcon {
+        font-size: 32px;
+        text-align: center;
+        line-height: 32px;
+        border-radius: 50%;
+        border: 12px solid transparent;
+        background: rgba(255, 255, 255, 1);
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: -12px;
+        right: -12px;
+    }
+    .closeIcon:hover {
+        color: rgba(0, 0, 0, 0.51);
+        cursor: pointer;
+    }
+
+    #helper {
+        position: fixed;
+        top: calc(50% - 40px);
+        left: calc(50% - 100px);
+        width: 200px;
+        height: 80px;
         opacity: 1;
+        transition: 2s;
     }
 
-    body {
-        background-color: #121b22;
-        font-family: 'Open Sans Condensed';
-        overflow: hidden;
+    [class$="-legend"] {
+        list-style: none;
+        cursor: pointer;
+        padding-left: 0;
+    }
+
+    [class$="-legend"] li {
+        display: inline-block;
+        padding: 0 5px;
+    }
+
+    [class$="-legend"] li.hidden {
+        text-decoration: line-through;
+    }
+
+    [class$="-legend"] li span {
+        border-radius: 5px;
+        display: inline-block;
+        height: 12px;
+        margin-right: 10px;
+        width: 12px;
+    }
+
+    #mapLegend {
+        opacity: 0;
+        transition: 1s opacity;
+        position: fixed;
+        bottom: 12px;
+        right: 9%;
+        z-index: 999999;
+        /*background: rgba(255, 255, 255, 0.71);*/
+        padding-left: 12px;
+        padding-right: 12px;
+        /*border-radius: 50%;*/
     }
 
 </style>
-<link rel="stylesheet" type="text/css" href="fontCondensed.css"/>
 
 <body>
-<input style="display: none" id="redditURLinput" class="inputElements" placeholder=" paste any reddit comment URL here"
-       title="e.g.: https://www.reddit.com/r/gifs/comments/4jgnjw/police_officer_saves_a_dog_from_drowning/">
+<div class="container">
+    <div id="tooltip-span" style="position: absolute;"></div>
+    <div id="helper">
+        <- Fields of studies
+        <br />
+        <br />
+        <hr />
+        <br />
+        Where you can study ->
+    </div>
+    <div class="demo-3">
+        <!-- Codrops top bar -->
+        <div class="main clearfix">
+            <div class="column">
+                <div id="dl-menu" class="dl-menuwrapper">
+                    <h3 class="dl-header">Branches of Science</h3>
+                    <button class="dl-trigger">Branches of Science</button>
+                    <ul class="dl-menu" id="dl-menu-attach">
+                    </ul>
+                </div><!-- /dl-menuwrapper -->
+            </div>
+        </div>
+    </div><!-- /container -->
+    <div id="mapLegend">
+        <div id="legend"><ul class="0-legend"><li class=""><span style="background-color:#204969"></span>Exact match</li><li><span style="background-color:#08fdc8"></span>Category match</li></ul></div>
+    </div>
+    <div id="map">
 
-<select style="display: none" id="redditFrontPage" class="inputElements">
-    <option value="" style="color: #2cc0ec">Select from current frontpage</option>
-</select>
-<a id="linkReddit" href="" target="_blank">LINK</a>
-<script src="jquery.min.js"></script>
-<script src="d3.v3.min.js"></script>
-<script src="d3.tip.v0.6.3.js"></script>
-<script>
-    var usedItemLabel = []
-    function getUnique(arr, comp) {
+    </div>
+    <div id="myDiv">
+        <div class="closeIcon">X</div>
+        <iframe id="wikiIframe" src="" style="display: none" width="100%" height="100%" frameborder="0"></iframe>
+        <div id="contentWiki" style="overflow: auto; display: none">
+            <h3 id="universityLocation"></h3>
+            <div id="universityCourses"></div>
+        </div>
+    </div>
+</div>
 
-        const unique = arr
-            .map(function(e) { return e[comp]})
+<script src="https://code.jquery.com/jquery-2.0.2.js"></script>
+<script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js"></script>
+<script src="js/L.Icon.FontAwesome.js" type="text/javascript"></script>
+<script src="data/universityLatLng.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var leafCourses = []
+    const HIGHLIGHTCOLOR1 = '#204969'
+    const HIGHLIGHTCOLOR2 = '#08fdc8'
+    const BACKGROUNDCOLOR1 = '#dadada'
+    const BACKGROUNDCOLOR2 = '#fff7f7'
+    const MARKERCOLOR = '#919191'
+    let group = L.layerGroup()
+    var tooltipSpan = document.getElementById('tooltip-span');
+    var map = L.map('map', {
+        center:[51.42, 9.60],
+        zoom: 6,
+        maxZoom: 18,
+        layers: new L.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+            zoom: 13
+        })
+    })
 
-        // store the keys of the unique objects
-    .map(function(e, i, final){console.debug(e, (!e || final.indexOf(e) === i) && i);  return (!e || final.indexOf(e) === i) && i})
+    function handleMouseOver(d, event) {
+        event.stopPropagation();
+        var wikiId = d.data.itemWiki || d.data.data.itemWiki
+        var wikiLabel = d.data.itemLabel || d.data.data.itemLabel
+        var dataHeight = typeof d.height !== "undefined" ? d.height : d.data.height
+        var dataChildren = d.children || d.data.children
 
-        // eliminate the dead keys & store unique objects
-    .filter(function(e) { return arr[e] }).map(function(e) { return arr[e]  });
+        if (wikiLabel === "Branches of Science") {
+            d3.selectAll(".markerBackground").style("fill", HIGHLIGHTCOLOR2)
+            $("#mapLegend").css("opacity", 1)
+        } else {
+            if (dataHeight !== 0) {
+                highlightUniversitiesChildren(dataChildren)
+            } else {
+                var toHighlight = coursesToUniversities[wikiLabel]
+                if (toHighlight && toHighlight.length !== 0) {
+                    highlightUniversities(coursesToUniversities[wikiLabel])
+                }
+                else {
+                    // highlight all root classes
+                    highlightUniversitiesChildren(d.parent.children)
+                }
+            }
+        }
+        currentlySelected = d.id
 
-        return unique;
+        d3.select('#myText' + d.id)
+            .style('fill-opacity', 0.6)
+
+        var { x, y } = document.getElementById('myDl' + d.id).getBoundingClientRect()
+        tooltipSpan.innerHTML = ''
+        tooltipSpan.style.top = Math.floor(y/2) + 'px';
+        tooltipSpan.style.left = (x + 360) + 'px';
+        var oReq = new XMLHttpRequest()
+        oReq.open('GET', "https://en.wikipedia.org/api/rest_v1/page/summary/" + wikiId, true)
+        oReq.onreadystatechange = function () {
+            if (currentlySelected === d.id && oReq.readyState === XMLHttpRequest.DONE && oReq.status === 200) {
+                var wikiData = JSON.parse(oReq.response)
+                var imgIbj = wikiData.thumbnail
+                tooltipSpan.innerHTML = (imgIbj ? '<img src="'+ imgIbj.source +'" style="float: right; padding-bottom: 4px; width: 208px;">' : '') + '<div style="width: 200px; padding-left: 4px; padding-right: 4px;">' + wikiData.extract_html + '</div>'
+                tooltipSpan.style.opacity = 1
+            }
+        }
+        oReq.send(null)
     }
 
+
+    function handleMouseOut(d, event) {
+        event.stopPropagation()
+        cleanUp()
+        currentlySelected = false
+        tooltipSpan.style.opacity = 0
+        d3.select('#myText' + d.id)
+            .style('fill-opacity', 1)
+        setTimeout(function () {
+            d3.select('#myId' + d.id)
+                .style('fill-opacity', 1)
+        }, 200)
+    }
+
+
+    var universityNames = Object.keys(universityLatLng)
+    var universities = Object.values(universityLatLng).map((el, index) => {
+            return {
+                name: universityNames[index],
+                latLng: el,
+                id: universityNames[index]
+            }
+        }
+    )
+
+    universities.forEach(university => {
+        let marker = L.marker(university.latLng, {
+            icon: L.icon.fontAwesome({
+                iconClasses: 'fa fa-university ',
+                markerColor: MARKERCOLOR,
+                markerClass: university.name,
+                iconSize: [20, 40],
+                iconColor: BACKGROUNDCOLOR2
+            }),
+            title: university.name,
+            riseOnHover: true
+        });
+
+        marker.on('mouseover',function(ev) {
+            var universityId = ev.target.options.title;
+            d3.selectAll("#" + universityId).style("fill", HIGHLIGHTCOLOR1)
+        });
+
+        marker.on('click',function(ev) {
+            const universityName = ev.target.options.title
+            $("#universityLocation").html("Courses available in " + universityName)
+            const wikiAlreadyOpen = $("#myDiv").css("display") === "block"
+            $("#wikiIframe").css("display","none");
+            $("#contentWiki").css("display","block");
+            $("#contentWiki").css("height", Math.floor(document.body.offsetHeight * 0.8) + "px")
+            $("#universityCourses").html("<ul>" + (universitiesToCourses[universityName] || []).map(el => "<li>" + el + "</li>").join("") + "</ul>")
+
+            if (!wikiAlreadyOpen) {
+                slideIn()
+            }
+        });
+
+        marker.on('mouseout',function(ev) {
+            var universityId = ev.target.options.title;
+            d3.selectAll("#" + universityId).style("fill", MARKERCOLOR)
+        });
+
+        // Add each marker to the group
+        group.addLayer( marker );
+
+        // Save the ID of the marker with it's data
+        university.marker_id = group.getLayerId(marker);
+    })
+
+    // Add the group to the map
+    group.addTo(map);
+
+    // Click handler for handling
+    function onClickUniversity(marker_id) {
+        let marker = group.getLayer(marker_id);
+
+        // map.panTo( marker.getLatLng() );
+    }
+
+
+    function slideIn() {
+        // Set the effect type
+        var effect = 'slide';
+
+        // Set the options for the effect type chosen
+        var options = { direction: 'right' };
+
+        // Set the duration (default: 400 milliseconds)
+        var duration = 500;
+
+        $('#myDiv').toggle(effect, options, duration);
+    };
+
+    function closeContent () {
+        $("#wikiIframe").css("display","none");
+        $("#contentWiki").css("display","none");
+        slideIn();
+    }
+
+    $(".closeIcon").click(function () {
+        closeContent();
+    });
+
+</script>
+<script type="text/javascript">
+    var currentlySelected = false
+
+    window.addEventListener('resize', () => location.href=location.href, {passive: true})
     function makeTree(csv) {
-        var data = d3.nest()
-            .key(function(d) {return d.instanceLabel; })
-            .key(function(d) {return d.subclassLabel; })
-            .entries(csv);
+
+        var data = d3.stratify()
+            .id(function(d) { return d.itemLabel; })
+            .parentId(function(d) { return d.instanceLabel; })
+            ([...csv, {itemWiki: "Branches of Science", itemLabel: "Branches of Science", instanceLabel: null}].reduce((unique, o) => {
+                if(!unique.some(obj => obj.itemLabel === o.itemLabel)) {
+                    unique.push(o);
+                }
+                return unique;
+            },[]));
+
+
+        // TODO:
+
+        var idIterator = 0
+        function buildDropdowns(restOfTree, attachTo, init) {
+            if (!restOfTree) return
+            var anchorElement = attachTo
+            if (!init && restOfTree.children) {
+                var ul = document.createElement("ul");   // Create a <button> element
+                ul.className = "dl-submenu"
+                // ul.innerHTML = '<li class="dl-back"><a href="#">Back</a></li>';                   // Insert text
+                anchorElement.appendChild(ul);
+                anchorElement = ul
+            }
+
+            (restOfTree.children || []).forEach(function(child) {
+
+                var li = document.createElement("li")
+                li.id = "myDl" + child.id // + idIterator
+                idIterator = idIterator + 1;
+                li.innerHTML = '<a href="#">' + child.id + '</a>'
+                li.addEventListener("mouseover", function(e){
+                    handleMouseOver(child, e)
+                });
+                li.addEventListener("mouseout", function(e){
+                    handleMouseOut(child, e)
+                });
+
+                anchorElement.appendChild(li);
+                buildDropdowns(child, li)
+            })
+        }
+        buildDropdowns(data, document.getElementById('dl-menu-attach'), true)
+
+        $( '#dl-menu' ).dlmenu({
+            animationClasses : { classin : 'dl-animate-in-2', classout : 'dl-animate-out-2' }
+        });
+        // d3.nest()
+        //     .key(function(d) {return d.instanceLabel; })
+        //     .entries(csv);
 
         return data;
     }
+    var universityMap = {}
+    // d3.tsv("data/courses.csv", function(coursesTsv) {
+    //     coursesTsv.forEach(function (university) {
+    //         if (typeof universityMap[university.location] === "undefined") {
+    //             universityMap[university.location] = 0
+    //         } else {
+    //             universityMap[university.location] = universityMap[university.location] + 1;
+    //         }
+    //     })
+    // })
+    d3.csv("data/outline.csv", function(csv) {
+        var treeData = makeTree(csv)
 
-    d3.csv("data/raw.csv", function(csv) {
-        // var csv = getUnique(csv2,'image')
-    function constructNetwork() {
-        var maxRating = 0;
+        // Set the dimensions and margins of the diagram
+        var margin = {top: 20, right: 90, bottom: 30, left: 190},
+            width = document.body.offsetWidth - margin.left - margin.right,
+            height = document.body.offsetHeight - margin.top - margin.bottom;
 
-        var colorId = 0;
-        var currBranch = 0;
-        var nodeIndex = 1;
-        var totalNodes = 0;
-        var graph = {
-            "nodes": [
-                {"name": "", "value": 0, "branch": 0}
-            ],
-            "links": []
-        };
+        // append the svg object to the body of the page
+        // appends a 'group' element to 'svg'
+        // moves the 'group' element to the top left margin
+        var svg = d3.select("svg")
+            .attr("width", (width + margin.right + margin.left)*.8)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate("
+                + margin.left + "," + margin.top + ")");
 
+        var i = 0,
+            duration = 750,
+            root;
 
-        function findMax(data) {
-            $.each(data, function (i, item) {
-                var rating = (item.values || [1]).length;
-                if (rating > maxRating) {
-                    maxRating = rating;
-                }
+        // declares a tree layout and assigns the size
+        var treemap = d3.tree().size([height, width]);
 
-                if (item.values !== undefined) {
-                    findMax(nodeIndex - 1, item.values);
-                }
-            });
+        // Assigns parent, children, height, depth
+        root = d3.hierarchy(treeData, function(d) { return d.children; });
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        // Collapse after the second level
+        root.children.forEach(collapse);
+
+        update(root);
+
+        // Collapse the node and all it's children
+        function collapse(d) {
+            if(d.children) {
+                d._children = d.children
+                d._children.forEach(collapse)
+                d.children = null
+            }
         }
 
-        var linearScale;
-        var chargeScale;
+        function update(source) {
 
-        function addChildren(currParent, data, csv) {
-            // children [], body '', author '', score 1, replies {}
-            $.each(data, function (i, item) {
-                totalNodes++;
+            // Assigns the x and y position for the nodes
+            var treeData = treemap(root);
 
+            // Compute the new tree layout.
+            var nodes = treeData.descendants(),
+                links = treeData.descendants().slice(1);
 
-                var postItem = Object.assign({}, item)
-                if (!item.itemLabel) {
-                    postItem = Object.assign({}, csv.find(function (el){ return el.instanceLabel === item.key }) || item)
-                }
-                var comment = item.itemDescription || item.key;
-                var author = postItem.itemLabel || item.key || '';
-                var img = postItem.image
-                var rating = (item.values || [1]).length;
+            // Normalize for fixed-depth.
+            nodes.forEach(function(d){ d.y = d.depth * 200});
 
-                if (comment) {
-                    graph.nodes.push({
-                        "name": '[' + rating + '] ' + author + ': "' + comment + '"',
-                        "item": author,
-                        "img": img,
-                        "author": author,
-                        "rating": rating,
-                        "comment": comment,
-                        "value": (postItem.itemLabel) ? (5+(2*rating)) : 0,
-                        "branch": currBranch
-                    });
-                    // usedItemLabel.push(postItem.item)
-                    graph.links.push({"source": nodeIndex, "target": currParent, "value": (rating)});
-                    nodeIndex++;
+            // ****************** Nodes section ***************************
 
-                    if (item.values !== undefined) {
-                        addChildren(nodeIndex - 1, item.values, csv);
+            // Update the nodes...
+            var node = svg.selectAll('g.node')
+                .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+            // Enter any new modes at the parent's previous position.
+            var nodeEnter = node.enter().append('g')
+                .attr('class', 'node')
+                .attr("transform", function(d) {
+                    if (d.height === 0) {
+                        if (!leafCourses.includes(d.data.id)) leafCourses.push(d.data.id)
                     }
+                    return "translate(" + source.y0 + "," + source.x0 + ")";
+                })
+                .on('click', click);
 
-                    if (currParent === 0) {
-                        currBranch++;
-                    }
-                }
+            // Add Circle for the nodes
+            nodeEnter.append('circle')
+                .attr('class', 'node')
+                .attr('r', 1e-6)
+                .style("fill", function(d) {
+                    return d._children ? "lightsteelblue" : "#9b00ff";
+                })  // Get attributes from circleAttrs var
+                .on("mouseenter", handleMouseOverNode)
+                .on("mouseout", handleMouseOutNode);
 
+            // Add labels for the nodes
+            nodeEnter.append('text')
+                .attr("dy", ".35em")
+                .attr("x", function(d) {
+                    return d.children || d._children ? -13 : 13;
+                })
+                .attr("text-anchor", function(d) {
+                    return d.children || d._children ? "end" : "start";
+                })
+                .text(function(d) { return d.data.id + (d._children ? (' (' + d._children.length+ ')') : ''); })
+                .attr('class', 'textLabel')
+                .attr('id', function(d) { return "myText"+d.id })
+                .on("mouseenter", handleMouseOver)
+                .on("mouseout", handleMouseOut);
 
-            });
+            // UPDATE
+            var nodeUpdate = nodeEnter.merge(node);
 
-        }
-
-        // $.getJSON(redditURL + ".json?", function (data) {
-
-            var imgurl = "ttps://lh3.googleusercontent.com/-oFQMUUolRKw/AAAAAAAAAAI/AAAAAAAAAAA/ACHi3rdOkNsLdWz-R5D2LLk2z2fHQrryuQ/s32-c-mo/photo.jpg"
-
-            // if (data[0] !== undefined) {
-            //     imgurl = data[0].data.children[0].data.thumbnail;
-            // }
-
-            var data = makeTree(csv)
-
-            findMax(data)
-
-            sqrrootScale = d3.scale.sqrt()
-                .domain([0, maxRating])
-                .range([0, 2]);
-
-            chargeScale = d3.scale.sqrt()
-                .domain([0, 500])
-                .range([600, 40]);
-
-
-            /** constructing data **/
-            addChildren(0, data, csv);
-
-
-            chargeIndex = chargeScale(totalNodes);
-
-            console.debug("chargeIndex", chargeIndex, totalNodes);
-            console.debug("data", data)
-
-
-            var tip = d3.tip()
-                .attr('class', 'd3-tip')
-                .offset([-10, 0])
-                .html(function (d) {
-                    return "<div class='titleTT' style='color: " + color(d.branch) + "'>" + (d.img ? "<img style=\"float: right; padding-left: 1em\" src=\"" + d.img + "\" height=\"100\" width=\"100\">" : "") + (d.author || d.item) + " (" + d.rating + ")</span><br><br><span class='contentTT'>" + d.comment + "</span>";
+            // Transition to the proper position for the node
+            nodeUpdate.transition()
+                .duration(duration)
+                .attr("transform", function(d) {
+                    return "translate(" + d.y + "," + d.x + ")";
                 });
 
-            /** build visualization **/
-            var width = window.innerWidth - 20,
-                height = window.innerHeight - 20;
+            // Update the node attributes and style
+            nodeUpdate.select('circle.node')
+                .attr('r', 10)
+                .attr('id', function(d) { return "myId"+d.id })
+                .style("fill", function(d) {
+                    return d._children ? "rgba(158, 158, 158, 0.4)" : BACKGROUNDCOLOR2;
+                })
+                .attr('cursor', 'pointer');
 
-            var color = d3.scale.category10();
 
-            var force = d3.layout.force()
-                .charge(-chargeIndex)
-                .linkDistance(1)
-                .size([width, height]);
+            // Remove any exiting nodes
+            var nodeExit = node.exit().transition()
+                .duration(duration)
+                .attr("transform", function(d) {
+                    return "translate(" + source.y + "," + source.x + ")";
+                })
+                .remove();
 
-            var svg = d3.select("body")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
+            // On exit reduce the node circles size to 0
+            nodeExit.select('circle')
+                .attr('r', 1e-6);
 
-            var defs = svg.append("defs").attr("id", "imgdefs")
+            // On exit reduce the opacity of text labels
+            nodeExit.select('text')
+                .style('fill-opacity', 1e-6);
 
-            var catpattern = defs.append("pattern")
-                .attr("id", "catpattern")
-                .attr("height", 50)
-                .attr("width", 50)
+            // ****************** links section ***************************
 
-            catpattern.append("image")
-                .attr("x", -50)
-                .attr("y", -40)
-                .attr("height", 100)
-                .attr("width", 100)
-                .attr("xlink:href", imgurl)
+            // Update the links...
+            var link = svg.selectAll('path.link')
+                .data(links, function(d) { return d.id; });
 
-            svg.call(tip);
-
-            force
-                .nodes(graph.nodes)
-                .links(graph.links)
-                .start();
-
-            var link = svg.selectAll(".link")
-                .data(graph.links)
-                .enter().append("line")
+            // Enter any new links at the parent's previous position.
+            var linkEnter = link.enter().insert('path', "g")
                 .attr("class", "link")
-                .style("stroke-width", function (d) {
-                    return Math.sqrt(d.value);
+                .attr('d', function(d){
+                    var o = {x: source.x0, y: source.y0}
+                    return diagonal(o, o)
                 });
 
-            var node = svg.selectAll(".node")
-                .data(graph.nodes)
-                .enter().append("circle")
-                .attr("class", "node")
-                .attr("r", function (d) {
-                    return d.value
+            // UPDATE
+            var linkUpdate = linkEnter.merge(link);
+
+            // Transition back to the parent element position
+            linkUpdate.transition()
+                .duration(duration)
+                .attr('d', function(d){ return diagonal(d, d.parent) });
+
+            // Remove any exiting links
+            var linkExit = link.exit().transition()
+                .duration(duration)
+                .attr('d', function(d) {
+                    var o = {x: source.x, y: source.y}
+                    return diagonal(o, o)
                 })
-                .style("fill", function (d) {
-                    return color(d.branch);
-                })
-                .on('mouseover', tip.show)
-                .on('mouseout', tip.hide)
-                .call(force.drag);
+                .remove();
 
-            d3.select("circle")
-                .append("g")
-                .attr("transform", function(d){return "translate("+d.x+",80)"})
-                .append("text")
-                .attr("dx", function(d){return -20})
-                .text(function(d){return 'Branches of Science'})
-                .style("fill", "url(#catpattern)")
-                .on('mouseover', tip.hide)
-                .style("stroke", "#E13CFF")
-                .style("stroke-width", 2)
-                .style("cursor", "inherit");
-
-
-            force.on("tick", function () {
-
-                var q = d3.geom.quadtree(graph.nodes),
-                    i = 0,
-                    n = graph.nodes.length;
-                while (++i < n) {
-                    q.visit(collide(graph.nodes[i]));
-                }
-
-                link.attr("x1", function (d) {
-                    return d.source.x;
-                })
-                    .attr("y1", function (d) {
-                        return d.source.y;
-                    })
-                    .attr("x2", function (d) {
-                        return d.target.x;
-                    })
-                    .attr("y2", function (d) {
-                        return d.target.y;
-                    });
-
-                node.attr("cx", function (d) {
-                    return d.x;
-                })
-                    .attr("cy", function (d) {
-                        return d.y;
-                    });
+            // Store the old positions for transition.
+            nodes.forEach(function(d){
+                d.x0 = d.x;
+                d.y0 = d.y;
             });
 
+            // Creates a curved (diagonal) path from parent to the child nodes
+            function diagonal(s, d) {
+                path = `M ${s.y} ${s.x}
+                C ${(s.y + d.y) / 2} ${s.x},
+                  ${(s.y + d.y) / 2} ${d.x},
+                  ${d.y} ${d.x}`
 
-            function collide(node) {
-                var r = node.value + 16,
-                    nx1 = node.x - r,
-                    nx2 = node.x + r,
-                    ny1 = node.y - r,
-                    ny2 = node.y + r;
-                return function (quad, x1, y1, x2, y2) {
-                    if (quad.point && (quad.point !== node)) {
-                        var x = node.x - quad.point.x,
-                            y = node.y - quad.point.y,
-                            l = Math.sqrt(x * x + y * y),
-                            r = node.value + quad.point.value;
-                        if (l < r) {
-                            l = (l - r) / l * .5;
-                            node.x -= x *= l;
-                            node.y -= y *= l;
-                            quad.point.x += x;
-                            quad.point.y += y;
+                return path
+            }
+
+
+            // Toggle children on click.
+            function click(d) {
+                var contentOpen = $("#myDiv").css("display") === "block"
+                $("#helper").css("opacity", 0)
+                if (contentOpen) closeContent()
+                d.parent && d.parent.children && d.parent.children.forEach(collapse);
+                // onClickUniversity('2342fc7')
+                if (d.children) {
+                    d._children = d.children;
+                    d.children = null;
+                } else {
+                    if (!d._children) {
+                        var wikiId = ((d.data || {}).data || {}).itemWiki
+                        if (wikiId) {
+                            $("#myDiv").css("height", Math.floor(document.body.offsetHeight * 0.8) + "px")
+                            $("#wikiIframe").attr("src",'https://en.wikipedia.org/wiki/' + wikiId + '?printable=yes')
+                            var wikiAlreadyOpen = $("#myDiv").css("display") === "block"
+
+                            if (!wikiAlreadyOpen) {
+                                $("#wikiIframe").css("display","block")
+                                $("#contentWiki").css("display","none");
+                                slideIn()
+                            }
                         }
                     }
-                    return x1 > nx2
-                        || x2 < nx1
-                        || y1 > ny2
-                        || y2 < ny1;
-                };
+                    d.children = d._children;
+                    d._children = null;
+                }
+                update(d);
             }
-    }
-        constructNetwork();
+
+
+            function handleMouseOverNode(d, i, e, event) {
+                d3.select('#myId' + d.id)
+                    .style('fill-opacity', 0.2)
+            }
+
+
+            function handleMouseOutNode(d, i, e, event) {
+                tooltipSpan.style.opacity = 0
+                d3.select('#myId' + d.id)
+                    .style('fill-opacity', 1)
+                setTimeout(function () {
+                    d3.select('#myId' + d.id)
+                        .style('fill-opacity', 1)
+                }, 200)
+            }
+        }
     })
 
+    function highlightUniversities(uArray, secondary = false) {
+        if (!uArray) return
+        uArray.forEach(el => {
+            try {
+                d3.selectAll("#" + el).style("fill", secondary ? HIGHLIGHTCOLOR2 : HIGHLIGHTCOLOR1)
+                $("#mapLegend").css("opacity", 1)
+            } catch (err) {
+                console.log(err)
+            }
+        })
+    }
+
+    function highlightUniversitiesChildren(children) {
+        if (!children) return
+        children.forEach((child) => {
+            if (child.height === 0) {
+                var wikiLabel = (child.data.data || {}).itemLabel || child.data.itemLabel
+                highlightUniversities(coursesToUniversities[wikiLabel], true)
+            }
+            else {
+                highlightUniversitiesChildren((child.data || {}).children || child.children)
+            }
+        })
+    }
+
+    function cleanUp() {
+        d3.selectAll(".markerBackground").style("fill", MARKERCOLOR)
+        $("#mapLegend").css("opacity", 0)
+    }
+
 </script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="js/jquery.dlmenu.js"></script>
+<script type="text/javascript">
+    $(function() {
+        // $( '#dl-menu' ).dlmenu({
+        //     animationClasses : { classin : 'dl-animate-in-2', classout : 'dl-animate-out-2' }
+        // });
+    });
+</script>
+</body>
