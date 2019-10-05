@@ -54,7 +54,7 @@ nav .up:hover {
   top: 50%;
   left: 50%;
   -webkit-transform: translateX(-50%) translateY(-50%);
-          transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
   transition: color .4s, opacity .8s, -webkit-filter .8s;
   transition: color .4s, opacity .8s, filter .8s;
   transition: color .4s, opacity .8s, filter .8s, -webkit-filter .8s;
@@ -65,7 +65,7 @@ nav .up:hover {
 }
 .node.hide .label {
   -webkit-filter: blur(10px);
-          filter: blur(10px);
+  filter: blur(10px);
 }
 .node:hover .label {
   color: white;
@@ -115,6 +115,7 @@ nav .up:hover {
 
 .dl-menuwrapper:first-child {
   margin-right: 100px;
+  background: #395970;
 }
 
 .dl-menuwrapper button {
@@ -132,7 +133,7 @@ nav .up:hover {
 .dl-menuwrapper button:hover,
 .dl-menuwrapper button.dl-active,
 .dl-menuwrapper ul {
-  background: #aaa;
+  background: #8c8c8c;
 }
 
 .dl-menuwrapper button:after {
@@ -881,15 +882,22 @@ All this is done for any sub-level being entered.
   background: #D35400;
 }
 
+.demo-3 {left: 30%;
+  position: absolute;}
+
+
 /* Demo 3 */
-.demo-3 .dl-menuwrapper button {
-  background: #08cbc4;
+.demo-3 .dl-menuwrapper .dl-back {
+  background: #40637e;
 }
 
-.demo-3 .dl-menuwrapper button:hover,
-.demo-3 .dl-menuwrapper button.dl-active,
-.demo-3 .dl-menuwrapper ul {
-  background: #00b4ae;
+.demo-3 .dl-menuwrapper .subjectItem {
+  background: #5c7a90;
+}
+
+.demo-3 .dl-menuwrapper .subjectItem:hover,
+.demo-3 .dl-menuwrapper button.dl-active {
+   background: #00cb96;
 }
 
 /* Demo 4 */
@@ -974,11 +982,14 @@ a:hover {
 }
 
 .main {
+
   max-width: 69em;
-  padding-top: 2em;
+  padding-top: 10px;
+  padding-left: 36px;
 }
 
 .column {
+  z-index: 9999999;
   float: left;
   width: 50%;
   padding: 0 2em;
@@ -1114,6 +1125,58 @@ a:hover {
   opacity: 0;
 }
 
+/*.marker-icon-svg {*/
+  /*background: #fff;*/
+  /*border: 1px solid #666;*/
+  /*border-radius: 50%;*/
+  /*height: 12px;*/
+  /*width: 12px;*/
+/*}*/
+
+.leaflet-fa-markers {
+  height: 12px !important;
+  width: 12px !important;
+  margin-top: -10px !important;
+  background: #607d93;
+  border: 2px solid #607d93;
+  border-radius: 50%;
+}
+
+.leaflet-fa-markers:hover {
+  background: #47fbce !important;
+}
+
 .dl-header {
   float: left;
+  padding-left: 20px;
+  color: #d0cfd4;
+}
+
+.search .dl-menuwrapper:first-child {
+  margin-right: -20px;
+  background: #ffffffbd;
+}
+
+.searchButton:hover {
+  opacity: 0.8;
+}
+
+.fa-search {
+
+  width: 60px;
+  height: 60px;
+  display: inline-block;
+  font: normal normal normal 14px/1 FontAwesome;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  width: 40px;
+  height: 40px;
+  font-size: 36px;
+  text-align: center;
+  display: block;
+  float: left;
+  line-height: 55px;
+  margin-left: 8px;
 }

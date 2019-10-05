@@ -22,6 +22,7 @@ L.Icon.FontAwesome = L.Icon.extend({
 
         // container div
         var iconDiv = L.DomUtil.create('div', 'leaflet-fa-markers');
+        iconDiv.id = options.markerClass;
 
         // feature icon
         var iconSpan = L.DomUtil.create('span', options.iconClasses + ' feature-icon');
@@ -35,20 +36,20 @@ L.Icon.FontAwesome = L.Icon.extend({
         // marker icon L.DomUtil doesn't seem to like svg, just append out html directly
         var markerSvg = document.createElement('div');
         markerSvg.className = "marker-icon-svg";
-        markerSvg.innerHTML = '<svg ' +
-            'width="16px" ' +
-            'height="26px" ' +
-            'viewBox="0 0 16 26" ' +
-            'version="1.1" ' +
-            'xmlns="http://www.w3.org/2000/svg" ' +
-            'xmlns:xlink="http://www.w3.org/1999/xlink">' +
-            '<path class="markerBackground" id="' + options.markerClass + '" d="'+options.markerPath+'" ' +
-            'fill="'+ options.markerColor + '"></path>' +
-            '</svg>';
+        // markerSvg.innerHTML = '<svg ' +
+        //     'width="16px" ' +
+        //     'height="26px" ' +
+        //     'viewBox="0 0 16 26" ' +
+        //     'version="1.1" ' +
+        //     'xmlns="http://www.w3.org/2000/svg" ' +
+        //     'xmlns:xlink="http://www.w3.org/1999/xlink">' +
+        //     '<path class="markerBackground" id="' + options.markerClass + '" d="'+options.markerPath+'" ' +
+        //     'fill="'+ options.markerColor + '"></path>' +
+        //     '</svg>';
 
 
         iconDiv.appendChild(markerSvg);
-        iconDiv.appendChild(iconSpan);
+        // iconDiv.appendChild(iconSpan);
         return iconDiv;
     }
 });

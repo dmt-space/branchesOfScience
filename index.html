@@ -73,12 +73,14 @@
         background-image: linear-gradient(57deg, #464646 0%, #4a4a4a 21%, #909090 100%);
     }
     .container #map {
-        flex: 0 0 40%;
+        flex: 0 0 67%; /*40%;*/
         margin: 0 0 0 auto;
         position: sticky !important;
         right: 0;
-        -webkit-mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);
-        mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);
+
+        /*-webkit-mask-image: linear-gradient(0.25turn, #00000000, #000045, #291a1a)*/
+        /*-webkit-mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);*/
+        /*mask-image: linear-gradient(0.25turn, #180f0f00, #00000014, #00000040, #000000a1, #000000, #000000, #00000087, #00000038, #84848400);*/
     }
 
     #list {
@@ -200,18 +202,54 @@
         /*border-radius: 50%;*/
     }
 
+    .iframeContainer {
+        background: white;
+        padding-left: 12px;
+        width: 33%;
+        height: 100%;
+        position: absolute;
+    }
+
 </style>
 
 <body>
 <div class="container">
     <div id="tooltip-span" style="position: absolute;"></div>
-    <div id="helper">
-        <- Fields of studies
-        <br />
-        <br />
-        <hr />
-        <br />
-        Where you can study ->
+    <!--<div id="helper">-->
+        <!--<- Fields of studies-->
+        <!--<br />-->
+        <!--<br />-->
+        <!--<hr />-->
+        <!--<br />-->
+        <!--Where you can study ->-->
+    <!--</div>-->
+    <div class="iframeContainer">
+        <iframe id="articleIframe" src="https://en.wikipedia.org/wiki/Branches_of_science?printable=yes" frameborder="0" style="width: 100%; height: calc(100% - 8px); padding: 18px 8px 0px;"></iframe>
+    </div>
+    <div class="demo-3 search" style=" right: -52px; left: auto; ">
+        <div class="main clearfix">
+            <div class="column">
+                <div class="dl-menuwrapper">
+                    <input placeholder="Search Course/ City" type="text" id="search" name="name" style="
+    background: transparent;
+    border: none;
+    width: calc(100% - 60px);
+    height: 60px;
+    float: left;
+    margin: 0px;
+    padding: 12px;
+    font-size: 24px;
+    /* width: 100%; */
+">
+                    <!--<h3 class="dl-header">Branches of Science</h3>-->
+                    <ul class="dl-menu">
+                    </ul>
+                    <div class="searchButton" style="width: 60px;height: 60px;background: #395970;font: normal normal normal 14px/1 FontAwesome;color: white;float: right;cursor: pointer;"><i class="fas fa-search"></i></div>
+                    <div>
+                    </div>
+                </div><!-- /dl-menuwrapper -->
+            </div>
+        </div>
     </div>
     <div class="demo-3">
         <!-- Codrops top bar -->
@@ -227,7 +265,7 @@
         </div>
     </div><!-- /container -->
     <div id="mapLegend">
-        <div id="legend"><ul class="0-legend"><li class=""><span style="background-color:#204969"></span>Exact match</li><li><span style="background-color:#08fdc8"></span>Category match</li></ul></div>
+        <div id="legend"><ul class="0-legend"><li style="color: #607D93; font-weight: 600" class=""><span style="background-color:#ff5f00; border: 2px solid #607d93; border-radius: 50%;"></span>Exact match</li><li style="color: #607D93; font-weight: 600"><span style="background-color:#08fdc8; border: 2px solid #607d93; border-radius: 50%;"></span>Category match</li></ul></div>
     </div>
     <div id="map">
 
@@ -253,11 +291,11 @@
 <script src="data/universityLatLng.js" type="text/javascript"></script>
 <script type="text/javascript">
     var leafCourses = []
-    const HIGHLIGHTCOLOR1 = '#204969'
+    const HIGHLIGHTCOLOR1 = '#ff5f00'
     const HIGHLIGHTCOLOR2 = '#08fdc8'
     const BACKGROUNDCOLOR1 = '#dadada'
     const BACKGROUNDCOLOR2 = '#fff7f7'
-    const MARKERCOLOR = '#919191'
+    const MARKERCOLOR = '#607d93'
     let group = L.layerGroup()
     var tooltipSpan = document.getElementById('tooltip-span');
     var map = L.map('map', {
@@ -454,6 +492,7 @@
             (restOfTree.children || []).forEach(function(child) {
 
                 var li = document.createElement("li")
+                li.className = "subjectItem"
                 li.id = "myDl" + child.id // + idIterator
                 idIterator = idIterator + 1;
                 li.innerHTML = '<a href="#">' + child.id + '</a>'
@@ -500,29 +539,29 @@
         // append the svg object to the body of the page
         // appends a 'group' element to 'svg'
         // moves the 'group' element to the top left margin
-        var svg = d3.select("svg")
-            .attr("width", (width + margin.right + margin.left)*.8)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate("
-                + margin.left + "," + margin.top + ")");
-
-        var i = 0,
-            duration = 750,
-            root;
-
-        // declares a tree layout and assigns the size
-        var treemap = d3.tree().size([height, width]);
-
-        // Assigns parent, children, height, depth
-        root = d3.hierarchy(treeData, function(d) { return d.children; });
-        root.x0 = height / 2;
-        root.y0 = 0;
-
-        // Collapse after the second level
-        root.children.forEach(collapse);
-
-        update(root);
+        // var svg = d3.select("svg")
+        //     .attr("width", (width + margin.right + margin.left)*.8)
+        //     .attr("height", height + margin.top + margin.bottom)
+        //     .append("g")
+        //     .attr("transform", "translate("
+        //         + margin.left + "," + margin.top + ")");
+        //
+        // var i = 0,
+        //     duration = 750,
+        //     root;
+        //
+        // // declares a tree layout and assigns the size
+        // var treemap = d3.tree().size([height, width]);
+        //
+        // // Assigns parent, children, height, depth
+        // root = d3.hierarchy(treeData, function(d) { return d.children; });
+        // root.x0 = height / 2;
+        // root.y0 = 0;
+        //
+        // // Collapse after the second level
+        // root.children.forEach(collapse);
+        //
+        // update(root);
 
         // Collapse the node and all it's children
         function collapse(d) {
@@ -725,7 +764,7 @@
         if (!uArray) return
         uArray.forEach(el => {
             try {
-                d3.selectAll("#" + el).style("fill", secondary ? HIGHLIGHTCOLOR2 : HIGHLIGHTCOLOR1)
+                d3.selectAll("#" + el).style("background", secondary ? HIGHLIGHTCOLOR2 : HIGHLIGHTCOLOR1)
                 $("#mapLegend").css("opacity", 1)
             } catch (err) {
                 console.log(err)
@@ -747,7 +786,8 @@
     }
 
     function cleanUp() {
-        d3.selectAll(".markerBackground").style("fill", MARKERCOLOR)
+        d3.selectAll(".leaflet-fa-markers").style("background", MARKERCOLOR)
+        // d3.selectAll(".markerBackground").style("fill", MARKERCOLOR)
         $("#mapLegend").css("opacity", 0)
     }
 
