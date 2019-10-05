@@ -882,7 +882,7 @@ All this is done for any sub-level being entered.
   background: #D35400;
 }
 
-.demo-3 {left: 30%;
+.demo-3 {left: 33%;
   position: absolute;}
 
 
@@ -978,6 +978,7 @@ a:hover {
 .container > header {
   width: 100%;
   margin: 0 auto;
+  margin-left: -58px;
   padding: 0 1.875em 3.125em 1.875em;
 }
 
